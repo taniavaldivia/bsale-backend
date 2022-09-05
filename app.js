@@ -21,7 +21,7 @@ app.use(express.json())
 app.all('*', function(req, res, next) {
   var origin = req.get('origin') 
   res.header('Access-Control-Allow-Origin', origin)
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With')
+  res.header("Access-Control-Allow-Headers", 'X-Requested-With')
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })
@@ -67,6 +67,15 @@ app.get('/products/:id', (req, res) => {
   if (!req.params.id) res.send('MUST INCLUDE ID')
 
   connection.query(`SELECT * FROM product WHERE id = ${mysql.escape(req.params.id)}`, (err, results) => {
+    if (err) { console.log(err) }
+    return res.status(200).send(results)
+  })
+})
+
+app.get('/products/category/:id', (req, res) => {
+  if (!req.params.id) res.send('MUST INCLUDE ID')
+
+  connection.query(`SELECT * FROM product WHERE category = ${mysql.escape(req.params.id)}`, (err, results) => {
     if (err) { console.log(err) }
     return res.status(200).send(results)
   })

@@ -15,13 +15,17 @@ const connection = mysql.createConnection({
  
 connection.connect()
 
+connection.on('error', function(err) {
+  console.log(err);
+});
+
 app.use(cors())
 app.use(express.json())
 
 app.all('*', function(req, res, next) {
   var origin = req.get('origin') 
   res.header('Access-Control-Allow-Origin', origin)
-  res.header("Access-Control-Allow-Headers", 'X-Requested-With')
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With')
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })
@@ -54,7 +58,7 @@ app.get('/categories', (req, res) => {
 })
 
 app.get('/search', (req, res) => {
-  if (!req.query.search) res.send('SEARCH STRING IS REQUIRED')
+  if (!req.query.search) return res.send('SEARCH STRING IS REQUIRED')
   const search = mysql.escape(req.query.search)
 
   connection.query(`SELECT * FROM product WHERE name LIKE '%${search.replaceAll("'", '')}%'`, (err, results) => {
@@ -64,7 +68,7 @@ app.get('/search', (req, res) => {
 })
 
 app.get('/products/:id', (req, res) => {
-  if (!req.params.id) res.send('MUST INCLUDE ID')
+  if (!req.params.id) return res.send('MUST INCLUDE ID')
 
   connection.query(`SELECT * FROM product WHERE id = ${mysql.escape(req.params.id)}`, (err, results) => {
     if (err) { console.log(err) }
@@ -73,9 +77,11 @@ app.get('/products/:id', (req, res) => {
 })
 
 app.get('/products/category/:id', (req, res) => {
-  if (!req.params.id) res.send('MUST INCLUDE ID')
+  if (!req.params.id) return res.send('MUST INCLUDE ID')
 
-  connection.query(`SELECT * FROM product WHERE category = ${mysql.escape(req.params.id)}`, (err, results) => {
+  const query = `SELECT * FROM product WHERE category = ${mysql.escape(req.params.id)}`
+ 
+  connection.query(query, (err, results) => {
     if (err) { console.log(err) }
     return res.status(200).send(results)
   })
